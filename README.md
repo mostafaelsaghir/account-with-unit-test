@@ -23,6 +23,15 @@ GET /customer/{customerId} => customer
 POST /account => creates a new account for customer
 
 ```
+
+# Example Of POST account request 
+```html
+{
+    "customerId":"756fb037-5067-4e60-ba55-075c30904cbb",
+    "initialCredit": 233
+}
+```
+
 *hint: first call GET '/customer' to view the existing customers it will retrieve 4 customers (Mostafa, Matin, Martin, Leo).
 
 *hint: to create account you should POST '/account' and it accept body like e.g {
