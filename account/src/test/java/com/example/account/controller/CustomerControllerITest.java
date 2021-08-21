@@ -1,0 +1,47 @@
+package com.example.account.controller;
+
+import com.example.account.entity.CustomerDto;
+import com.example.account.integrationTestSupport;
+import com.example.account.model.Customer;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Objects;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+public class CustomerControllerITest extends integrationTestSupport {
+
+    @Test
+    public void testGetCustomerById_whenCustomerIdExists_shouldReturnCustomerDto() throws Exception {
+
+        Customer customer = customerRepository.save(generateCustomer());
+        accountService.createAccount(generateCreateAccountRequest(customer.getId(), 100));
+
+        CustomerDto expected = converter.convertToCustomerDto(
+                customerRepository.findById(
+                        Objects.requireNonNull(customer.getId())));
+
+        this.mockMvc.perform(get(CUSTOMER_API_ENDPOINT + "/" + customer.getId()))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(mapper.writer().withDefaultPrettyPrinter().writeValueAsString(expected), false))
+                .andReturn();
+    }
+
+    @Test
+    public void testGetCustomerById_whenCustomerIdDoesNotExist_shouldReturnHttpNotFound() throws Exception {
+
+        this.mockMvc.perform(get(CUSTOMER_API_ENDPOINT + "non-exists-customer"))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+}
